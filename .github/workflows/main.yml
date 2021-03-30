@@ -1,0 +1,30 @@
+name: Build and deploy package
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@main
+
+    - name: Set up .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '5.0.x'
+
+    - name: Dotnet build
+      run: dotnet build --configuration Release
+    
+    - name: Dotnet test
+      run: dotnet test
+    
+    - name: Create package
+      run: dotnet pack --configuration Release
+
+    - name: Publish package
+      run: dotnet nuget push "./Gravatar/bin/Release/*.nupkg" -k ${{ secrets.NUGET_TOKEN }} -s https://api.nuget.org/v3/index.json
